@@ -24,14 +24,6 @@ class HomeScreenWidgetProvider : AppWidgetProvider() {
 
             val views = RemoteViews(context.packageName, R.layout.widget_layout).apply {
                 setTextViewText(R.id.widget_counter_text, counter.toString())
-                
-                // Create background update intent
-                val backgroundIntent = HomeWidgetBackgroundIntent.getBroadcast(
-                    context,
-                    Uri.parse("myAppWidget://backgroundUpdate")
-                )
-                
-                setOnClickPendingIntent(R.id.widget_increment_button, backgroundIntent)
             }
 
             appWidgetManager.updateAppWidget(appWidgetId, views)
