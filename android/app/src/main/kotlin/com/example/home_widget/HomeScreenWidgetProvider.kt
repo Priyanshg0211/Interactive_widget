@@ -3,8 +3,10 @@ package com.example.home_widget
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetPlugin
 import es.antonborri.home_widget.HomeWidgetBackgroundIntent
@@ -16,25 +18,20 @@ class HomeScreenWidgetProvider : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         for (appWidgetId in appWidgetIds) {
+            // Get data from widget storage
             val widgetData = HomeWidgetPlugin.getData(context)
             val counter = widgetData.getInt("counter", 0)
 
             val views = RemoteViews(context.packageName, R.layout.widget_layout).apply {
                 setTextViewText(R.id.widget_counter_text, counter.toString())
                 
-                val intent = Intent(context, HomeScreenWidgetProvider::class.java).apply {
-                    action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds)
-                }
-                
-                val pendingIntent = PendingIntent.getBroadcast(
+                // Create background update intent
+                val backgroundIntent = HomeWidgetBackgroundIntent.getBroadcast(
                     context,
-                    appWidgetId,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    Uri.parse("myAppWidget://backgroundUpdate")
                 )
                 
-                setOnClickPendingIntent(R.id.widget_increment_button, pendingIntent)
+                setOnClickPendingIntent(R.id.widget_increment_button, backgroundIntent)
             }
 
             appWidgetManager.updateAppWidget(appWidgetId, views)
@@ -44,20 +41,16 @@ class HomeScreenWidgetProvider : AppWidgetProvider() {
     override fun onReceive(context: Context?, intent: Intent?) {
         super.onReceive(context, intent)
         
-        if (context != null && intent?.action == AppWidgetManager.ACTION_APPWIDGET_UPDATE) {
+        if (context != null) {
             val widgetData = HomeWidgetPlugin.getData(context)
-            var counter = widgetData.getInt("counter", 0)
+            val counter = widgetData.getInt("counter", 0)
             
-            counter++
-            
-            val prefs = HomeWidgetPlugin.getData(context)
-            prefs.edit().putInt("counter", counter).apply()
-            
+            // Update widget
             val appWidgetManager = AppWidgetManager.getInstance(context)
-            val appWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS)
-            if (appWidgetIds != null) {
-                onUpdate(context, appWidgetManager, appWidgetIds)
-            }
+            val componentName = ComponentName(context, HomeScreenWidgetProvider::class.java)
+            val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
+            
+            onUpdate(context, appWidgetManager, appWidgetIds)
         }
     }
 }

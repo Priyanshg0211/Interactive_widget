@@ -8,16 +8,20 @@ const String backgroundUpdate = "backgroundUpdate";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
   await HomeWidget.registerBackgroundCallback(backgroundCallback);
   runApp(const MyApp());
 }
 
-// Background callback
 Future<void> backgroundCallback(Uri? uri) async {
   if (uri?.host == backgroundUpdate) {
-    int? counter = await HomeWidget.getWidgetData<int>('counter', defaultValue: 0);
-    await HomeWidget.saveWidgetData<int>('counter', counter! + 1);
+    int? counter = await HomeWidget.getWidgetData<int>(countKey, defaultValue: 0);
+    counter = counter! + 1;
+    
+    // Update both storage locations
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(countKey, counter);
+    await HomeWidget.saveWidgetData<int>(countKey, counter);
+    
     await HomeWidget.updateWidget(
       name: appWidgetProviderClass,
       androidName: 'HomeScreenWidgetProvider',
@@ -59,8 +63,20 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _loadCounter() async {
     final prefs = await SharedPreferences.getInstance();
+    // First try to get from SharedPreferences
+    int? storedCounter = prefs.getInt(countKey);
+    
+    if (storedCounter == null) {
+      // If not in SharedPreferences, try to get from Widget data
+      storedCounter = await HomeWidget.getWidgetData<int>(countKey, defaultValue: 0);
+      // Save to SharedPreferences if found in widget data
+      if (storedCounter != null) {
+        await prefs.setInt(countKey, storedCounter);
+      }
+    }
+    
     setState(() {
-      _counter = prefs.getInt('counter') ?? 0;
+      _counter = storedCounter ?? 0;
     });
   }
 
@@ -68,15 +84,17 @@ class _MyHomePageState extends State<MyHomePage> {
     await HomeWidget.setAppGroupId('com.example.home_widget');
   }
 
-  void _incrementCounter() async {
+  Future<void> _incrementCounter() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _counter++;
-      prefs.setInt('counter', _counter);
     });
 
-    // Update home widget
-    await HomeWidget.saveWidgetData<int>('counter', _counter);
+    // Update both storage locations
+    await prefs.setInt(countKey, _counter);
+    await HomeWidget.saveWidgetData<int>(countKey, _counter);
+    
+    // Update widget
     await HomeWidget.updateWidget(
       name: appWidgetProviderClass,
       androidName: 'HomeScreenWidgetProvider',
