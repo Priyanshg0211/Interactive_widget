@@ -3,15 +3,34 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="8dp"
+    android:padding="16dp"
+    android:gravity="center"
     android:background="@drawable/widget_background">
 
     <TextView
-        android:id="@+id/widget_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="You have pushed the button this many times:"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/widget_counter_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="24sp"
+        android:textStyle="bold"
         android:textColor="#FFFFFF"
-        android:layout_gravity="center"/>
+        android:layout_marginTop="8dp"/>
+
+    <ImageButton
+        android:id="@+id/widget_increment_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_add"
+        android:background="@drawable/floating_button_background"
+        android:layout_marginTop="8dp"
+        android:contentDescription="Increment"/>
 
 </LinearLayout>
