@@ -10,7 +10,7 @@
     <uses-permission android:name="com.example.home_widget.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
 
     <application
-        android:label="home_widget"
+        android:label="Home Widget"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
