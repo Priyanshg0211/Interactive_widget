@@ -63,13 +63,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _loadCounter() async {
     final prefs = await SharedPreferences.getInstance();
-    // First try to get from SharedPreferences
     int? storedCounter = prefs.getInt(countKey);
     
     if (storedCounter == null) {
-      // If not in SharedPreferences, try to get from Widget data
       storedCounter = await HomeWidget.getWidgetData<int>(countKey, defaultValue: 0);
-      // Save to SharedPreferences if found in widget data
       if (storedCounter != null) {
         await prefs.setInt(countKey, storedCounter);
       }
@@ -90,11 +87,9 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
 
-    // Update both storage locations
     await prefs.setInt(countKey, _counter);
     await HomeWidget.saveWidgetData<int>(countKey, _counter);
     
-    // Update widget
     await HomeWidget.updateWidget(
       name: appWidgetProviderClass,
       androidName: 'HomeScreenWidgetProvider',
